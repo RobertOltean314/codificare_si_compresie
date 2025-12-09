@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Huffman Encoding/Decoding Tool</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🗜️ Huffman Encoding/Decoding Tool</h1>
+        <p>Compress and decompress files using Huffman coding</p>
+      </header>
+
+      <div class="main-content">
+        <section class="panel encoder-panel">
+          <h2>📥 Encoder</h2>
+
+          <div class="file-input-section">
+            <label for="encode-file-input" class="file-label">
+              <span class="button">Load File</span>
+              <span id="encode-file-name" class="file-name"
+                >No file selected</span
+              >
+            </label>
+            <input type="file" id="encode-file-input" accept="*/*" hidden />
+          </div>
+
+          <div class="options">
+            <label class="checkbox-label">
+              <input type="checkbox" id="encode-show-codes" />
+              <span>Show Codes</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="encode-two-bytes" />
+              <span>Use 2-byte symbols</span>
+            </label>
+          </div>
+
+          <button id="encode-button" class="button primary-button" disabled>
+            Encode File
+          </button>
+
+          <div id="encode-results" class="results" style="display: none">
+            <h3>Compression Results</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-label">Original Size:</span>
+                <span id="encode-original-size" class="stat-value">-</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Compressed Size (Total):</span>
+                <span id="encode-compressed-size" class="stat-value">-</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Header Size:</span>
+                <span id="encode-header-size" class="stat-value">-</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Compressed Data Size:</span>
+                <span id="encode-data-size" class="stat-value">-</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Compression Ratio:</span>
+                <span id="encode-ratio" class="stat-value">-</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Space Saved:</span>
+                <span id="encode-saved" class="stat-value">-</span>
+              </div>
+            </div>
+            <button id="download-encoded" class="button download-button">
+              Download Encoded File
+            </button>
+          </div>
+
+          <div
+            id="encode-codes-container"
+            class="codes-container"
+            style="display: none"
+          >
+            <h3>Huffman Codes</h3>
+            <div id="encode-codes" class="codes-list"></div>
+          </div>
+        </section>
+
+        <section class="panel decoder-panel">
+          <h2>📤 Decoder</h2>
+
+          <div class="file-input-section">
+            <label for="decode-file-input" class="file-label">
+              <span class="button">Load Encoded File</span>
+              <span id="decode-file-name" class="file-name"
+                >No file selected</span
+              >
+            </label>
+            <input
+              type="file"
+              id="decode-file-input"
+              accept=".hsa,.HSA"
+              hidden
+            />
+          </div>
+
+          <div class="options">
+            <label class="checkbox-label">
+              <input type="checkbox" id="decode-show-codes" />
+              <span>Show Codes</span>
+            </label>
+          </div>
+
+          <button id="decode-button" class="button primary-button" disabled>
+            Decode File
+          </button>
+
+          <div id="decode-results" class="results" style="display: none">
+            <h3>Decompression Results</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-label">Encoded File Size:</span>
+                <span id="decode-original-size" class="stat-value">-</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Decoded Size:</span>
+                <span id="decode-decompressed-size" class="stat-value">-</span>
+              </div>
+            </div>
+            <button id="download-decoded" class="button download-button">
+              Download Decoded File
+            </button>
+          </div>
+
+          <div
+            id="decode-codes-container"
+            class="codes-container"
+            style="display: none"
+          >
+            <h3>Huffman Codes</h3>
+            <div id="decode-codes" class="codes-list"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay" style="display: none">
+      <div class="spinner"></div>
+      <p>Processing...</p>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

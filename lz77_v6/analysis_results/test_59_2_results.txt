@@ -1,0 +1,91 @@
+
+==========================================================================================
+ANALIZA COMPRESIE LZ77 - REZULTATE
+==========================================================================================
+
+Fisier: test_59_2.csv
+Dimensiune Originala: 17,224 bytes
+Data Analizei: 2025-11-15 14:52:19
+
+==========================================================================================
+CEA MAI BUNA CONFIGURATIE
+==========================================================================================
+
+Offset: 14 biti
+  → Buffer cautare: 16383 bytes
+  → Poate cauta pana la 16383 bytes inapoi pentru potriviri
+
+Length: 6 biti
+  → Potrivire maxima: 63 bytes
+  → Poate coda potriviri de pana la 63 bytes
+
+Dimensiune Comprimata: 3,114 bytes
+Rata Compresie: 81.92%
+Spatiu Salvat: 14,110 bytes
+
+==========================================================================================
+CEA MAI SLABA CONFIGURATIE
+==========================================================================================
+
+Offset: 2 biti (Buffer: 3 bytes)
+Length: 7 biti (Match: 127 bytes)
+Dimensiune Comprimata: 28,579 bytes
+Rata Compresie: -65.93%
+
+==========================================================================================
+EXPLICATIE
+==========================================================================================
+
+BITI OFFSET (Orizontal pe heatmap):
+  - Controleaza cat de departe in trecut poate cauta encoderul pentru potriviri
+  - Valori mai mari = buffer de cautare mai mare = mai multe potentiale potriviri
+  - Interval testat: 2-15 biti (3 pana la 32,767 bytes lookback)
+  - Tradeoff: Mai multi biti = mai multa flexibilitate, dar token-uri mai mari
+
+BITI LENGTH (Vertical pe heatmap):
+  - Controleaza lungimea maxima a unei singure potriviri
+  - Valori mai mari = pattern-uri mai lungi pot fi codate eficient
+  - Interval testat: 2-7 biti (3 pana la 127 bytes per potrivire)
+  - Tradeoff: Mai multi biti = potriviri mai lungi, dar token-uri mai mari
+
+CODIFICARE CULORI (Heatmap):
+  - Verde = Compresie mai buna (output mai mic)
+  - Galben = Compresie moderata
+  - Rosu = Compresie slaba (output mai mare)
+
+DE CE ACEASTA CONFIGURATIE ESTE CEA MAI BUNA:
+  
+  Configuratia optima (14 biti offset, 6 biti length) 
+  obtine cel mai bun echilibru intre:
+  
+  1. Flexibilitatea de cautare: Un buffer de 16383 bytes permite 
+     gasirea de potriviri suficient de departe in trecut.
+  
+  2. Lungimea potrivirilor: Potriviri de pana la 63 bytes permit
+     codarea eficienta a pattern-urilor repetitive.
+  
+  3. Dimensiunea token-urilor: Fiecare token foloseste 
+     14 + 6 + 8 = 28 biti
+     pentru a coda (offset, length, next_char).
+  
+  Pentru acest tip de continut, configuratia balansata produce cea mai mica
+  dimensiune de fisier comprimat.
+
+==========================================================================================
+TOATE COMBINATIILE TESTATE (Top 10)
+==========================================================================================
+
+ 1. Offset=14 biti, Length=6 biti →    3,114 bytes ( 81.92%)
+ 2. Offset=13 biti, Length=5 biti →    3,119 bytes ( 81.89%)
+ 3. Offset=13 biti, Length=6 biti →    3,124 bytes ( 81.86%)
+ 4. Offset=14 biti, Length=5 biti →    3,127 bytes ( 81.85%)
+ 5. Offset=14 biti, Length=7 biti →    3,225 bytes ( 81.28%)
+ 6. Offset=15 biti, Length=6 biti →    3,225 bytes ( 81.28%)
+ 7. Offset=13 biti, Length=7 biti →    3,240 bytes ( 81.19%)
+ 8. Offset=15 biti, Length=5 biti →    3,243 bytes ( 81.17%)
+ 9. Offset=12 biti, Length=5 biti →    3,268 bytes ( 81.03%)
+10. Offset=12 biti, Length=6 biti →    3,304 bytes ( 80.82%)
+
+==========================================================================================
+Total combinatii testate: 84
+==========================================================================================

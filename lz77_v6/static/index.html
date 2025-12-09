@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LZ77 Compression & Decompression</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>LZ77 Compression & Decompression</h1>
+        <p>Compress and decompress files using the LZ77 algorithm</p>
+      </header>
+
+      
+      <section class="card">
+        <h2>Encoder</h2>
+        <div class="form-group">
+          <label for="encode-file">Select File to Encode:</label>
+          <input type="file" id="encode-file" accept="*/*" />
+          <div id="encode-file-info" class="file-info"></div>
+        </div>
+
+        <div class="parameters">
+          <div class="form-group">
+            <label for="offset-bits">Offset Bits (2-15):</label>
+            <input type="number" id="offset-bits" min="2" max="15" value="12" />
+          </div>
+
+          <div class="form-group">
+            <label for="length-bits">Length Bits (2-7):</label>
+            <input type="number" id="length-bits" min="2" max="7" value="4" />
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" id="display-tokens" />
+              Display Tokens
+            </label>
+          </div>
+        </div>
+
+        <button id="encode-btn" class="btn btn-primary" disabled>
+          Encode File
+        </button>
+
+        <div id="encode-result" class="result hidden">
+          <h3>Encoding Results</h3>
+          <p>
+            <strong>Encoded Filename:</strong>
+            <span id="encoded-filename"></span>
+          </p>
+          <p>
+            <strong>Original Size:</strong>
+            <span id="original-size"></span> bytes
+          </p>
+          <p>
+            <strong>Compressed Size:</strong>
+            <span id="compressed-size"></span> bytes
+          </p>
+          <p>
+            <strong>Compression Ratio:</strong>
+            <span id="compression-ratio"></span>%
+          </p>
+          <button id="download-encoded" class="btn btn-secondary">
+            Download Encoded File
+          </button>
+
+          <div id="tokens-display" class="tokens hidden">
+            <h4>Tokens</h4>
+            <div id="tokens-list"></div>
+          </div>
+        </div>
+      </section>
+
+      
+      <section class="card">
+        <h2>Decoder</h2>
+        <div class="form-group">
+          <label for="decode-file">Select .lz77 File to Decode:</label>
+          <input type="file" id="decode-file" accept=".lz77" />
+          <div id="decode-file-info" class="file-info"></div>
+        </div>
+
+        <button id="decode-btn" class="btn btn-primary" disabled>
+          Decode File
+        </button>
+
+        <div id="decode-result" class="result hidden">
+          <h3>Decoding Results</h3>
+          <p>
+            <strong>Decoded Filename:</strong>
+            <span id="decoded-filename"></span>
+          </p>
+          <p>
+            <strong>Compressed Size:</strong>
+            <span id="original-compressed-size"></span> bytes
+          </p>
+          <p>
+            <strong>Decompressed Size:</strong>
+            <span id="decompressed-size"></span> bytes
+          </p>
+          <button id="download-decoded" class="btn btn-secondary">
+            Download Decoded File
+          </button>
+        </div>
+      </section>
+
+      
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+      </div>
+
+      
+      <div id="error" class="error hidden"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

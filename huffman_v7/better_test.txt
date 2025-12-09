@@ -1,0 +1,7 @@
+Hello World! This is a test file for Huffman compression.
+It contains several lines of text to provide enough data for meaningful compression.
+The Huffman algorithm works better with more data because it can identify patterns.
+Let's add some repeated characters: AAAAAAAAAA BBBBBBBBBB CCCCCCCCCC
+And some repeated words: compression compression compression
+This file should give us good compression statistics to display.
+Total file size should be large enough to show proper file size formatting.

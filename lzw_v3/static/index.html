@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LZW Compression Tool</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>🗜️ LZW Compression Tool</h1>
+      <p class="subtitle">
+        Variable Bit Width Compression with Auto-Update and Manual Modes
+      </p>
+
+      
+      <div class="section">
+        <h2>📦 Encode File (Compress)</h2>
+
+        
+        <div class="file-input-wrapper">
+          <input type="file" id="encodeFile" accept="*/*" />
+          <label for="encodeFile" class="file-input-label">
+            📁 Load File to Encode
+          </label>
+        </div>
+        <div class="file-name" id="encodeFileName">No file selected</div>
+
+        
+        <div class="options-group">
+          <h3>⚙️ Encoding Options</h3>
+
+          
+          <div class="option-row">
+            <label>Index Update Mode:</label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="autoUpdate"
+                  name="updateMode"
+                  value="auto"
+                  checked
+                />
+                <label for="autoUpdate"
+                  >Automatic (9→15 bits)
+                  <span class="info-badge">Recommended</span></label
+                >
+              </div>
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="manualUpdate"
+                  name="updateMode"
+                  value="manual"
+                />
+                <label for="manualUpdate">Manual (Fixed bits)</label>
+              </div>
+            </div>
+          </div>
+
+          
+          <div id="manualOptions" class="disabled-section">
+            <div class="option-row">
+              <label>Index Bit Size:</label>
+              <select id="indexBits">
+                <option value="9">9 bits (max 512 entries)</option>
+                <option value="10">10 bits (max 1,024 entries)</option>
+                <option value="11">11 bits (max 2,048 entries)</option>
+                <option value="12" selected>12 bits (max 4,096 entries)</option>
+                <option value="13">13 bits (max 8,192 entries)</option>
+                <option value="14">14 bits (max 16,384 entries)</option>
+                <option value="15">15 bits (max 32,768 entries)</option>
+              </select>
+            </div>
+
+            <div class="option-row">
+              <label>Dictionary Full Strategy:</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="freezeMode"
+                    name="dictMode"
+                    value="freeze"
+                    disabled
+                  />
+                  <label for="freezeMode"
+                    >Freeze (keep existing)
+                    <span class="info-badge">Not Implemented</span></label
+                  >
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="emptyMode"
+                    name="dictMode"
+                    value="empty"
+                    checked
+                  />
+                  <label for="emptyMode">Empty (clear & restart)</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="showEmittedCodes" />
+          <label for="showEmittedCodes"
+            >Display emitted indexes/codes in output</label
+          >
+        </div>
+
+        
+        <button class="encode-btn" id="encodeBtn" disabled>
+          Encode File (Compress)
+        </button>
+
+        
+        <div class="loading" id="encodeLoading">
+          <div class="spinner"></div>
+          <div>Encoding file...</div>
+        </div>
+
+        
+        <div class="error" id="encodeError"></div>
+
+        
+        <div class="stats" id="encodeStats">
+          <h3>📊 Encoding Statistics</h3>
+          <div class="stat-item">
+            <span class="stat-label">Original Size:</span>
+            <span class="stat-value" id="encodeOriginalSize">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Compressed Size:</span>
+            <span class="stat-value" id="encodeCompressedSize">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Header Size:</span>
+            <span class="stat-value" id="encodeHeaderSize">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Compression Ratio:</span>
+            <span class="stat-value" id="encodeCompressionRatio">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Space Saved:</span>
+            <span class="stat-value" id="encodeSpaceSaved">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Percentage Saved:</span>
+            <span class="stat-value" id="encodePercentageSaved">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Output File:</span>
+            <span class="stat-value" id="encodeOutputFile">-</span>
+          </div>
+        </div>
+
+        
+        <div class="codes-output" id="encodeCodesOutput"></div>
+      </div>
+
+      
+      <div class="section">
+        <h2>📂 Decode File (Decompress)</h2>
+
+        
+        <div class="file-input-wrapper">
+          <input type="file" id="decodeFile" accept=".LZW,.lzw" />
+          <label for="decodeFile" class="file-input-label">
+            📁 Load .LZW File to Decode
+          </label>
+        </div>
+        <div class="file-name" id="decodeFileName">No file selected</div>
+
+        
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="showDecodedCodes" />
+          <label for="showDecodedCodes"
+            >Display decoded indexes/codes in output</label
+          >
+        </div>
+
+        
+        <button class="decode-btn" id="decodeBtn" disabled>
+          Decode File (Decompress)
+        </button>
+
+        
+        <div class="loading" id="decodeLoading">
+          <div class="spinner"></div>
+          <div>Decoding file...</div>
+        </div>
+
+        
+        <div class="error" id="decodeError"></div>
+
+        
+        <div class="stats" id="decodeStats">
+          <h3>📊 Decoding Statistics</h3>
+          <div class="stat-item">
+            <span class="stat-label">Compressed Size:</span>
+            <span class="stat-value" id="decodeCompressedSize">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Decompressed Size:</span>
+            <span class="stat-value" id="decodeDecompressedSize">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Output File:</span>
+            <span class="stat-value" id="decodeOutputFile">-</span>
+          </div>
+        </div>
+
+        
+        <div class="codes-output" id="decodeCodesOutput"></div>
+      </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+  </body>
+</html>
