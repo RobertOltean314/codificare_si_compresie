@@ -1,21 +1,16 @@
-use core::error;
-use std::path::{self, Path};
+use std::{path::Path, vec};
 
-#[derive(Debug)]
 pub struct MyCustomImage {
     height: usize,
     width: usize,
     data: Vec<Vec<i32>>,
 }
 
-pub struct ImageManager;
-
-impl ImageManager {
-    pub fn read_image(&self, path: &Path) -> Result<MyCustomImage, bmp::BmpError> {
+impl MyCustomImage {
+    pub fn read_image(path: &Path) -> Result<Self, bmp::BmpError> {
         let img = bmp::open(path)?;
-        let width = img.get_width() as usize;
         let height = img.get_height() as usize;
-
+        let width = img.get_width() as usize;
         let mut data = Vec::with_capacity(height);
 
         for y in 0..height {
@@ -27,73 +22,62 @@ impl ImageManager {
             data.push(row);
         }
 
-        Ok(MyCustomImage {
-            width,
+        Ok(Self {
             height,
+            width,
             data,
         })
     }
+    fn get_prediction_matrix(&self) -> Vec<Vec<i32>> {
+        let mut predict = vec![vec![0i32; self.width]; self.height];
+        predict[0][0] = 128;
 
-    fn get_prediction_matrix(&self, original_img: &MyCustomImage) -> Vec<Vec<i32>> {
-        let mut data = vec![vec![0i32; original_img.width]; original_img.height];
-        data[0][0] = 128;
-
-        for j in 1..original_img.height {
-            data[j][0] = original_img.data[j - 1][0];
+        for row in 1..self.height {
+            predict[row][0] = self.data[row - 1][0];
         }
-
-        for i in 1..original_img.height {
-            data[0][i] = original_img.data[0][i - 1];
+        for col in 1..self.width {
+            predict[0][col] = self.data[0][col - 1];
         }
-
-        for i in 1..original_img.height {
-            for j in 1..original_img.width {
-                let a = original_img.data[i][j - 1]; // left
-                let b = original_img.data[i - 1][j]; // above
-                let c = original_img.data[i - 1][j - 1]; // diagonal
-                data[i][j] = a + b - c;
+        for row in 1..self.height {
+            for col in 1..self.width {
+                let a = self.data[row][col - 1];
+                let b = self.data[row - 1][col];
+                let c = self.data[row - 1][col - 1];
+                predict[row][col] = a + b - c;
             }
         }
-        data
+        predict
     }
 
-    pub fn predict(&self, path: &Path) -> Result<MyCustomImage, bmp::BmpError> {
-        let original_img = self.read_image(path)?;
-        let predicted = self.get_prediction_matrix(&original_img);
-
-        let height = original_img.height;
-        let width = original_img.width;
-        let original_data = &original_img.data;
-
-        let mut error_data = vec![vec![0i32; width]; height];
-
-        for y in 0..height {
-            for x in 0..width {
-                error_data[y][x] = original_data[y][x] - predicted[y][x];
+    pub fn predict(&self) -> Self {
+        let predict = self.get_prediction_matrix();
+        let mut error_data = vec![vec![0i32; self.width]; self.height];
+        for row in 0..self.height {
+            for col in 0..self.width {
+                error_data[row][col] = self.data[row][col] - predict[row][col];
             }
         }
 
-        Ok(MyCustomImage {
-            height,
-            width,
+        Self {
+            height: self.height,
+            width: self.width,
             data: error_data,
-        })
+        }
     }
 }
+
 fn main() -> Result<(), bmp::BmpError> {
     let path = Path::new("../Lenna256an.bmp");
-    let manager = ImageManager;
+    let original_img = MyCustomImage::read_image(path)?;
+    let error_img = original_img.predict();
 
-    let error_img = manager.predict(path)?;
+    println!("Error image size: {}*{}", error_img.width, error_img.height);
 
-    println!("Error image size: {}×{}", error_img.width, error_img.height);
-
-    for i in 0..error_img.height {
-        for j in 0..error_img.width {
-            print!("{:6}", error_img.data[i][j]);
+    for row in &error_img.data {
+        for &val in row {
+            print!("{:6}", val);
         }
+        println!();
     }
-
     Ok(())
 }
-
