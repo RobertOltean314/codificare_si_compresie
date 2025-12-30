@@ -1,37 +1,11 @@
-use crate::{bit_operations::BitWriter, predictiv::Predictiv};
+use crate::{
+    bit_operations::{BitReader, BitWriter},
+    helpers::*,
+    models::*,
+};
+
 use actix_files::NamedFile;
 use actix_web::{HttpResponse, Result, web};
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug)]
-pub struct Histogram([u32; 256]);
-
-impl Serialize for Histogram {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        self.0.serialize(serializer)
-    }
-}
-
-#[derive(Debug, Serialize)]
-pub struct EncodeResponse {
-    pub encoded_filename: String,
-    pub original_image: Vec<Vec<i32>>,
-    pub error_matrix: Vec<Vec<i32>>,
-    pub prediction_type: u8,
-    pub encoded_data: Vec<u8>,
-    pub original_histogram: Histogram,
-    pub error_histogram: Histogram,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct EncodeRequest {
-    pub file_name: String,
-    pub file_data: Vec<u8>,
-    pub prediction_number: u8,
-}
 
 pub async fn encode_file(req: web::Json<EncodeRequest>) -> Result<HttpResponse, actix_web::Error> {
     let mut writer = BitWriter::new();
@@ -39,13 +13,12 @@ pub async fn encode_file(req: web::Json<EncodeRequest>) -> Result<HttpResponse, 
     writer.data.extend_from_slice(&req.file_data[0..1078]);
     writer.write_n_bits(4, req.prediction_number as u32);
 
-    let original =
-        Predictiv::read_image(&req.file_data).map_err(actix_web::error::ErrorBadRequest)?;
-    let error_predictiv = original.predict(req.prediction_number as usize);
+    let original = read_image_data(&req.file_data).map_err(actix_web::error::ErrorBadRequest)?;
+    let error_predictiv = predict(&original, req.prediction_number as usize);
     let encoded_filename = format!("{}[{}].pre", req.file_name, req.prediction_number);
 
-    let original_histogram = Histogram(Predictiv::compute_histogram(&original.data, false));
-    let error_histogram = Histogram(Predictiv::compute_histogram(&error_predictiv.data, true));
+    let original_histogram = Histogram(compute_histogram(&original.data, false));
+    let error_histogram = Histogram(compute_histogram(&error_predictiv.data, true));
 
     for y in 0..256 {
         for x in 0..256 {
@@ -70,9 +43,30 @@ pub async fn encode_file(req: web::Json<EncodeRequest>) -> Result<HttpResponse, 
     Ok(HttpResponse::Ok().json(response))
 }
 
-pub async fn decode_file() -> Result<HttpResponse, actix_web::Error> {
-    // TODO: implement later
-    Ok(HttpResponse::NotImplemented().finish())
+pub async fn decode_file(req: web::Json<DecodeRequest>) -> Result<HttpResponse, actix_web::Error> {
+    let bytes = &req.file_data;
+
+    if bytes.len() < 1079 + 65536 {
+        return Err(actix_web::error::ErrorBadRequest("Invalid .pre file"));
+    }
+
+    let mut reader = BitReader::new(bytes);
+
+    let header = get_header_data(&mut reader)?;
+    let prediction_type = get_prediction_type(&mut reader)?;
+    let error_data = get_error_data(&mut reader)?;
+    let decoded = reconstruct_image(&error_data, prediction_type)?;
+
+    let decoded_bmp = build_bmp(&header, &decoded);
+
+    let response = DecodeResponse {
+        decoded_filename: format!("{}.decoded.bmp", req.file_name),
+        decoded_image: decoded,
+        predicted_type: prediction_type as u8,
+        decoded_bmp_data: decoded_bmp,
+    };
+
+    Ok(HttpResponse::Ok().json(response))
 }
 
 pub async fn index() -> Result<NamedFile> {

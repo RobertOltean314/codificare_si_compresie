@@ -1,4 +1,3 @@
-pub mod predictiv;
 use actix_cors::Cors;
 
 use actix_web::{
@@ -6,10 +5,12 @@ use actix_web::{
     web::{self},
 };
 
-use crate::api::{encode_file, index};
+use crate::api::{decode_file, encode_file, index};
 
 pub mod api;
-mod bit_operations;
+pub mod bit_operations;
+pub mod helpers;
+pub mod models;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -22,7 +23,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .route("/", web::get().to(index))
             .route("/api/encode", web::post().to(encode_file))
-            //            .route("/api/decode", web::post().to(decode_file))
+            .route("/api/decode", web::post().to(decode_file))
             .service(actix_files::Files::new("/static", "./static").show_files_listing())
     })
     .bind(("127.0.0.1", 8080))?
