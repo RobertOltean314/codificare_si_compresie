@@ -1,0 +1,183 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+    font-size: 28px;
+}
+
+/* ==================== THREE MAIN PANELS ==================== */
+.panels {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.panel {
+    flex: 1;
+    text-align: center;
+    background: #ecf0f1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.panel h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+canvas {
+    border: 3px solid #34495e;
+    border-radius: 8px;
+    background: white;
+    image-rendering: pixelated; /* Sharp pixels when upscaled */
+    width: 384px;   /* 256 × 1.5 upscale for better visibility */
+    height: 384px;
+}
+
+/* ==================== CONTROLS ROW ==================== */
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 280px;
+    background: #ecf0f1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.control-group.middle {
+    text-align: center;
+}
+
+button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 8px 4px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+button:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+/* Predictor radio buttons */
+.predictors label {
+    display: block;
+    margin: 8px 0;
+    font-size: 15px;
+}
+
+.predictors input[type="radio"] {
+    margin-right: 8px;
+}
+
+/* Scale slider */
+#errorScale {
+    width: 200px;
+    margin: 10px 0;
+}
+
+#scaleValue {
+    font-weight: bold;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+/* Histogram selector */
+.histogram-selector label {
+    display: block;
+    margin: 10px 0;
+}
+
+/* ==================== HISTOGRAM AT BOTTOM ==================== */
+.histogram-container {
+    text-align: center;
+    background: #ecf0f1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+#histogramCanvas {
+    background: white;
+    border: 3px solid #34495e;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.hist-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* ==================== STATUS ==================== */
+#status {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 30px;
+    color: #27ae60;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 1200px) {
+    .panels {
+        flex-direction: column;
+    }
+    canvas {
+        width: 300px;
+        height: 300px;
+    }
+}
+
+@media (max-width: 900px) {
+    .controls {
+        flex-direction: column;
+    }
+}

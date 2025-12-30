@@ -1,20 +1,31 @@
-pub mod my_custom_image;
-use my_custom_image::MyCustomImage;
+pub mod predictiv;
+use actix_cors::Cors;
 
-use std::path::Path;
+use actix_web::{
+    App, HttpServer,
+    web::{self},
+};
 
-fn main() -> Result<(), bmp::BmpError> {
-    let path = Path::new("../Lenna256an.bmp");
-    let original_img = MyCustomImage::read_image(path)?;
-    let error_img = original_img.predict();
+use crate::api::{encode_file, index};
 
-    println!("Error image size: {}*{}", error_img.width, error_img.height);
+pub mod api;
+mod bit_operations;
 
-    for row in &error_img.data {
-        for &val in row {
-            print!("{:6}", val);
-        }
-        println!();
-    }
-    Ok(())
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    println!("Starting Predictiv Server....");
+
+    HttpServer::new(|| {
+        let cors = Cors::permissive();
+
+        App::new()
+            .wrap(cors)
+            .route("/", web::get().to(index))
+            .route("/api/encode", web::post().to(encode_file))
+            //            .route("/api/decode", web::post().to(decode_file))
+            .service(actix_files::Files::new("/static", "./static").show_files_listing())
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Image Compressor</title>
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+    <div class="container">
+        <h1>3. Implementation details</h1>
+
+        <!-- Three main image panels -->
+        <div class="panels">
+            <div class="panel">
+                <h3>Original Image 256x256</h3>
+                <canvas id="originalCanvas" width="256" height="256"></canvas>
+            </div>
+            <div class="panel">
+                <h3>Error Matrix 256x256</h3>
+                <p id="errorLabel">128 + ErrorMatrix[i,j] × Scale</p>
+                <canvas id="errorCanvas" width="256" height="256"></canvas>
+            </div>
+            <div class="panel">
+                <h3>Decoded Image 256x256</h3>
+                <canvas id="decodedCanvas" width="256" height="256"></canvas>
+            </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="controls">
+
+            <!-- Left: Load, Predict, Store + Predictors -->
+            <div class="control-group">
+                <button id="loadImageBtn">Load image</button>
+                <button id="predictBtn" disabled>Predict</button>
+                <button id="storeBtn" disabled>Store</button>
+
+                <div class="predictors">
+                    <label><input type="radio" name="predictor" value="0"> 128</label><br>
+                    <label><input type="radio" name="predictor" value="1"> A</label><br>
+                    <label><input type="radio" name="predictor" value="2"> B</label><br>
+                    <label><input type="radio" name="predictor" value="3"> C</label><br>
+                    <label><input type="radio" name="predictor" value="4" checked> A+B-C</label><br>
+                    <label><input type="radio" name="predictor" value="5"> A + (B - C)/2</label><br>
+                    <label><input type="radio" name="predictor" value="6"> B + (A - C)/2</label><br>
+                    <label><input type="radio" name="predictor" value="7"> (A + B)/2</label><br>
+                    <label><input type="radio" name="predictor" value="8"> JPEG-LS</label><br>
+                    <label><input type="radio" name="predictor" value="9"> Personal (sqrt)</label>
+                </div>
+            </div>
+
+            <!-- Middle: Scale + Show error + Show histogram -->
+            <div class="control-group middle">
+                <label>Scale: <input type="range" id="errorScale" min="0.1" max="10" step="0.1" value="1.5"></label>
+                <span id="scaleValue">1.5</span><br><br>
+                <button id="showErrorBtn">Show error matrix</button><br><br>
+                <button id="showHistogramBtn">Show histogram</button>
+
+                <div class="histogram-selector">
+                    <label><input type="radio" name="histSource" value="original" checked> Original</label><br>
+                    <label><input type="radio" name="histSource" value="error"> Error prediction</label><br>
+                    <label><input type="radio" name="histSource" value="decoded"> Decoded</label>
+                </div>
+            </div>
+
+            <!-- Right: Load encoded, Decode, Save decoded -->
+            <div class="control-group">
+                <button id="loadEncodedBtn">Load encoded</button>
+                <button id="decodeBtn" disabled>Decode</button>
+                <button id="saveDecodedBtn" disabled>Save decoded</button>
+            </div>
+        </div>
+
+        <!-- Shared histogram at bottom -->
+        <div class="histogram-container">
+            <canvas id="histogramCanvas" width="512" height="200"></canvas>
+            <div class="hist-labels">
+                <span>-256</span>
+                <span style="margin-left: 200px;">Intensity</span>
+                <span style="float: right;">256</span>
+            </div>
+        </div>
+
+        <!-- Hidden file inputs -->
+        <input type="file" id="imageFileInput" accept=".bmp" style="display: none;">
+        <input type="file" id="encodedFileInput" accept=".pre" style="display: none;">
+
+        <div id="status"></div>
+    </div>
+
+    <script src="/static/index.js"></script>
+</body>
+</html>

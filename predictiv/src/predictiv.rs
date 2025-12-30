@@ -1,25 +1,25 @@
-use std::path::Path;
-
 type Predictor = fn(a: i32, b: i32, c: i32) -> i32;
 
-pub struct MyCustomImage {
+pub struct Predictiv {
     pub height: usize,
     pub width: usize,
     pub data: Vec<Vec<i32>>,
 }
 
-impl MyCustomImage {
-    pub fn read_image(path: &Path) -> Result<Self, bmp::BmpError> {
-        let img = bmp::open(path)?;
-        let height = img.get_height() as usize;
-        let width = img.get_width() as usize;
-        let mut data = Vec::with_capacity(height);
+impl Predictiv {
+    pub fn read_image(bytes: &[u8]) -> Result<Self, image::ImageError> {
+        let image = image::load_from_memory(bytes)?.to_rgb8();
+
+        let height = image.height() as usize;
+        let width = image.width() as usize;
+
+        let mut data = Vec::with_capacity(height * width);
 
         for y in 0..height {
             let mut row = Vec::with_capacity(width);
             for x in 0..width {
-                let pixel = img.get_pixel(x as u32, y as u32);
-                row.push(pixel.r as i32);
+                let pixel = image.get_pixel(x as u32, y as u32);
+                row.push(pixel[0] as i32); // ([0], [1], [2]) for RGB, rigth now only Red
             }
             data.push(row);
         }
@@ -30,6 +30,7 @@ impl MyCustomImage {
             data,
         })
     }
+
     fn get_prediction_matrix(&self, prediction: usize) -> Vec<Vec<i32>> {
         let mut predict = vec![vec![0i32; self.width]; self.height];
         predict[0][0] = 128;
@@ -84,9 +85,10 @@ impl MyCustomImage {
         predict
     }
 
-    pub fn predict(&self) -> Self {
-        let predict = self.get_prediction_matrix(10);
+    pub fn predict(&self, prediction_number: usize) -> Self {
+        let predict = self.get_prediction_matrix(prediction_number);
         let mut error_data = vec![vec![0i32; self.width]; self.height];
+
         for row in 0..self.height {
             for col in 0..self.width {
                 error_data[row][col] = self.data[row][col] - predict[row][col];
