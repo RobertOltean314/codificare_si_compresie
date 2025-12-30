@@ -1,9 +1,19 @@
-use std::fmt::write;
-
 use crate::{bit_operations::BitWriter, predictiv::Predictiv};
 use actix_files::NamedFile;
 use actix_web::{HttpResponse, Result, web};
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug)]
+pub struct Histogram([u32; 256]);
+
+impl Serialize for Histogram {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.serialize(serializer)
+    }
+}
 
 #[derive(Debug, Serialize)]
 pub struct EncodeResponse {
@@ -12,6 +22,8 @@ pub struct EncodeResponse {
     pub error_matrix: Vec<Vec<i32>>,
     pub prediction_type: u8,
     pub encoded_data: Vec<u8>,
+    pub original_histogram: Histogram,
+    pub error_histogram: Histogram,
 }
 
 #[derive(Debug, Deserialize)]
@@ -32,6 +44,9 @@ pub async fn encode_file(req: web::Json<EncodeRequest>) -> Result<HttpResponse, 
     let error_predictiv = original.predict(req.prediction_number as usize);
     let encoded_filename = format!("{}[{}].pre", req.file_name, req.prediction_number);
 
+    let original_histogram = Histogram(Predictiv::compute_histogram(&original.data, false));
+    let error_histogram = Histogram(Predictiv::compute_histogram(&error_predictiv.data, true));
+
     for y in 0..256 {
         for x in 0..256 {
             let err = error_predictiv.data[y][x];
@@ -48,6 +63,8 @@ pub async fn encode_file(req: web::Json<EncodeRequest>) -> Result<HttpResponse, 
         error_matrix: error_predictiv.data,
         prediction_type: req.prediction_number,
         encoded_data,
+        original_histogram,
+        error_histogram,
     };
 
     Ok(HttpResponse::Ok().json(response))

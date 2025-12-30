@@ -31,6 +31,23 @@ impl Predictiv {
         })
     }
 
+    pub fn compute_histogram(data: &Vec<Vec<i32>>, is_error: bool) -> [u32; 256] {
+        let mut histogram = [0u32; 256];
+
+        for row in data {
+            for &val in row {
+                let index = if is_error {
+                    ((val + 128).clamp(0, 255)) as usize
+                } else {
+                    val.clamp(0, 255) as usize
+                };
+                histogram[index] += 1;
+            }
+        }
+
+        histogram
+    }
+
     fn get_prediction_matrix(&self, prediction: usize) -> Vec<Vec<i32>> {
         let mut predict = vec![vec![0i32; self.width]; self.height];
         predict[0][0] = 128;
